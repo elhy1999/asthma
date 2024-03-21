@@ -1,0 +1,9 @@
+requirements for labelimg (offline annotation tool) 
+
+pyqt5
+lxml
+
+to access offline tool: 
+
+cd path_to_labelImg_folder
+python labelImg.py
