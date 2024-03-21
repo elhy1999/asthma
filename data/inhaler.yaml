@@ -1,6 +1,6 @@
-train: ../datasets/inhaler/train/images
-val: ../datasets/inhaler/valid/images
-# test: ../test/images
+train: data/train/images
+val: data/val/images
+test: data/test/images
 
 # nc: 3
 names: ['remove_cap', 'mouth_sealed_on_inhaler', 'mouth_closed']
