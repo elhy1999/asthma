@@ -173,6 +173,13 @@ runs/
 
 # Arhived folder (used for storing backups locally only)
 archive/
+coco/
 
 # Raw folder (used for storing large raw files)
 raw/
+
+# Train, Validation, and Test folders with duplicate images
+data/train
+data/val
+data/test
+
