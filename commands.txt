@@ -1,0 +1,7 @@
+Run this to train the model on GPU:
+
+python train_dual.py --workers 16 --device 0 --batch 8 --data data/inhaler.yaml --img 640 --cfg models/detect/yolov9-c.yaml --weights '' --name attempt --hyp hyp.scratch-high.yaml --min-items 0 --epochs 10 --close-mosaic 15
+
+Run this to run inference with the model:
+python detect_dual.py --source 0 --img 640 --device 0 --weights ./model_weights/best.pt --name best
+
