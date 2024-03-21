@@ -1,5 +1,5 @@
-train: ../datasets/inhaler/train/images
-val: ../datasets/inhaler/valid/images
+train: ./train/images
+# val: ./valid/images
 # test: ../test/images
 
 # nc: 3
