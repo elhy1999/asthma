@@ -1,0 +1,3 @@
+remove_cap
+mouth_sealed_on_inhaler
+mouth_closed
