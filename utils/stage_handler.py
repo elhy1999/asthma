@@ -3,7 +3,8 @@ from .plots import colors
 import time
 
 class StageHandler:
-    def __init__(self):
+    def __init__(self, stages_to_skip=tuple()):
+        self.stages_to_skip = stages_to_skip
         self.curr_stage = 1
 
         self.INHALER_HAND_CLASS_NAME = "inhaler_hand"
@@ -32,7 +33,8 @@ class StageHandler:
             message = get_message(1)
         else:
             message = get_message(2)
-            self.curr_stage = 2
+            self.go_to_next_stage()
+            print(f"Proceeding to stage {self.curr_stage}")
 
         annotator.box_label([0,0,0,0], message, color=colors(0, True))
 
@@ -41,12 +43,8 @@ class StageHandler:
             message = get_message(2)
         else:
             message = get_message(3)
-            self.curr_stage = 3
-        
-        # To remove #
-        message = get_message(3)
-        self.curr_stage = 3
-        #############
+            self.go_to_next_stage()
+            print(f"Proceeding to stage {self.curr_stage}")
 
         annotator.box_label([0,0,0,0], message, color=colors(0, True))
 
@@ -55,7 +53,8 @@ class StageHandler:
             message = get_message(3)
         else:
             message = get_message(4, 0)
-            self.curr_stage = 4
+            self.go_to_next_stage()
+            print(f"Proceeding to stage {self.curr_stage}")
         annotator.box_label([0,0,0,0], message, color=colors(0, True))
 
     def handle_stage4(self, annotator, classes_found):
@@ -70,7 +69,8 @@ class StageHandler:
             message = get_message(4, seconds)
         elif (self.mouth_closed_start_time != None) and (self.MOUTH_CLOSED_CLASS_NAME not in classes_found):
             message = get_message(5)
-            self.curr_stage = 5
+            self.go_to_next_stage()
+            print(f"Proceeding to stage {self.curr_stage}")
         else:
             message = get_message(4, 0)
         annotator.box_label([0,0,0,0], message, color=colors(0, True))
@@ -79,4 +79,9 @@ class StageHandler:
         message = get_message(5)
         annotator.box_label([0,0,0,0], message, color=colors(0, True))
 
-    
+    def go_to_next_stage(self):
+        if self.curr_stage == 5:
+            return
+        self.curr_stage += 1
+        while self.curr_stage in self.stages_to_skip and self.curr_stage < 5:
+            self.curr_stage += 1
