@@ -3,8 +3,11 @@ import os
 import platform
 import sys
 from pathlib import Path
+import time
 
 import torch
+
+from utils.stage_handler import StageHandler
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLO root directory
@@ -19,6 +22,7 @@ from utils.general import (LOGGER, Profile, check_file, check_img_size, check_im
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, smart_inference_mode
 
+STAGE_HANDLER = StageHandler()
 
 @smart_inference_mode()
 def run(
@@ -84,6 +88,7 @@ def run(
     # Run inference
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
+    curr_stage = 1
     for path, im, im0s, vid_cap, s in dataset:
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
@@ -121,6 +126,7 @@ def run(
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             imc = im0.copy() if save_crop else im0  # for save_crop
             annotator = Annotator(im0, line_width=line_thickness, example=str(names))
+            classes_found = []
             if len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
@@ -132,6 +138,7 @@ def run(
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
+                    classes_found.append(model.names[int(cls)])
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
@@ -146,14 +153,20 @@ def run(
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
 
             # Stream results
+            STAGE_HANDLER.handle(annotator=annotator, classes_found=classes_found) # Ernest code
             im0 = annotator.result()
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
                     cv2.namedWindow(str(p), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
                     cv2.resizeWindow(str(p), im0.shape[1], im0.shape[0])
+
+                ## Ernest Code ##
+                cv2.namedWindow(str(p), cv2.WINDOW_KEEPRATIO)
+                cv2.resizeWindow(str(p), 960, 720)
                 cv2.imshow(str(p), im0)
                 cv2.waitKey(1)  # 1 millisecond
+                #################
 
             # Save results (image with detections)
             if save_img:
