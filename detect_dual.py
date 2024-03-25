@@ -97,7 +97,8 @@ def run(
             if len(im.shape) == 3:
                 im = im[None]  # expand for batch dim
         image_dimensions = im.shape[2], im.shape[3]
-        XY_THRESHOLD = 0.1 * (image_dimensions[0] + image_dimensions[1]) / 2
+        SHAKING_THRESHOLD = 1 / 20
+        XY_THRESHOLD = SHAKING_THRESHOLD * (image_dimensions[0] + image_dimensions[1]) / 2
 
         # Inference
         with dt[1]:
@@ -143,7 +144,7 @@ def run(
                     class_name = model.names[int(cls)]
                     classes_found.append(class_name)
                     xy = (int(xyxy[0]), int(xyxy[1]))
-                    if class_name == "mouth_closed":
+                    if class_name == "inhaler_hand":
                         if inhaler_hand_xy is not None:
                             xy_diff = (xy[0] - inhaler_hand_xy[0], xy[1] - inhaler_hand_xy[1])
                             euclidean_distance_change = (xy_diff[0] ** 2 + xy_diff[1] ** 2) ** 0.5

@@ -7,13 +7,17 @@ class StageHandler:
         self.stages_to_skip = stages_to_skip
         self.curr_stage = 1
 
+        self.to_annotate_shaking = False
         self.INHALER_HAND_CLASS_NAME = "inhaler_hand"
         self.CAP_HAND_CLASS_NAME = "cap_hand"
         self.MOUTH_SEALED_ON_INHALER_CLASS_NAME = "mouth_sealed_on_inhaler"
         self.MOUTH_CLOSED_CLASS_NAME = "mouth_closed"
         self.MOUTH_OPENED_CLASS_NAME = "mouth_opened"
+        self.SHAKE_DETECTED_ANNOTATION_DURATION = 0.2 # seconds
+        self.colors_index = 0
 
         self.mouth_closed_start_time = None
+        self.shake_detected_start_time = None
 
     def handle(self, annotator, classes_found):
 
@@ -26,7 +30,7 @@ class StageHandler:
         elif self.curr_stage == 4:
             return self.handle_stage4(annotator, classes_found)
         elif self.curr_stage == 5:
-            return self.handle_stage5(annotator, classes_found)
+            return self.handle_stage5(annotator)
 
     def handle_stage1(self, annotator, classes_found):
         if ((self.CAP_HAND_CLASS_NAME not in classes_found) or (self.INHALER_HAND_CLASS_NAME not in classes_found)):
@@ -36,12 +40,15 @@ class StageHandler:
             self.go_to_next_stage()
             print(f"Proceeding to stage {self.curr_stage}")
 
-        annotator.box_label([0,0,0,0], message, color=colors(0, True))
+        annotator.box_label([0,0,0,0], message, color=colors(self.colors_index, True))
 
     def handle_stage2(self, annotator, classes_found):
         if self.to_annotate_shaking:
             message = get_shaking_message()
-            self.to_annotate_shaking = False
+            curr_time = time.time()
+            seconds = curr_time - self.shake_detected_start_time
+            if seconds >= self.SHAKE_DETECTED_ANNOTATION_DURATION:
+                self.to_annotate_shaking = False
         elif ((self.MOUTH_SEALED_ON_INHALER_CLASS_NAME not in classes_found)):
             message = get_message(2)
         else:
@@ -49,7 +56,7 @@ class StageHandler:
             self.go_to_next_stage()
             print(f"Proceeding to stage {self.curr_stage}")
 
-        annotator.box_label([0,0,0,0], message, color=colors(0, True))
+        annotator.box_label([0,0,0,0], message, color=colors(self.colors_index, True))
 
     def handle_stage3(self, annotator, classes_found):
         if ((self.MOUTH_SEALED_ON_INHALER_CLASS_NAME in classes_found)):
@@ -58,7 +65,7 @@ class StageHandler:
             message = get_message(4, 0)
             self.go_to_next_stage()
             print(f"Proceeding to stage {self.curr_stage}")
-        annotator.box_label([0,0,0,0], message, color=colors(0, True))
+        annotator.box_label([0,0,0,0], message, color=colors(self.colors_index, True))
 
     def handle_stage4(self, annotator, classes_found):
         # Initialize timer
@@ -76,11 +83,11 @@ class StageHandler:
             print(f"Proceeding to stage {self.curr_stage}")
         else:
             message = get_message(4, 0)
-        annotator.box_label([0,0,0,0], message, color=colors(0, True))
+        annotator.box_label([0,0,0,0], message, color=colors(self.colors_index, True))
 
-    def handle_stage5(self, annotator, classes_found):
+    def handle_stage5(self, annotator):
         message = get_message(5)
-        annotator.box_label([0,0,0,0], message, color=colors(0, True))
+        annotator.box_label([0,0,0,0], message, color=colors(self.colors_index, True))
 
     def go_to_next_stage(self):
         if self.curr_stage == 5:
@@ -90,4 +97,5 @@ class StageHandler:
             self.curr_stage += 1
 
     def annotate_shaking(self):
+        self.shake_detected_start_time = time.time()
         self.to_annotate_shaking = True
