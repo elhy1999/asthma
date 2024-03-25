@@ -88,7 +88,7 @@ def run(
     # Run inference
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
-    curr_stage = 1
+    inhaler_hand_xy = None
     for path, im, im0s, vid_cap, s in dataset:
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
@@ -96,6 +96,8 @@ def run(
             im /= 255  # 0 - 255 to 0.0 - 1.0
             if len(im.shape) == 3:
                 im = im[None]  # expand for batch dim
+        image_dimensions = im.shape[2], im.shape[3]
+        XY_THRESHOLD = 0.1 * (image_dimensions[0] + image_dimensions[1]) / 2
 
         # Inference
         with dt[1]:
@@ -138,7 +140,17 @@ def run(
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
-                    classes_found.append(model.names[int(cls)])
+                    class_name = model.names[int(cls)]
+                    classes_found.append(class_name)
+                    xy = (int(xyxy[0]), int(xyxy[1]))
+                    if class_name == "mouth_closed":
+                        if inhaler_hand_xy is not None:
+                            xy_diff = (xy[0] - inhaler_hand_xy[0], xy[1] - inhaler_hand_xy[1])
+                            euclidean_distance_change = (xy_diff[0] ** 2 + xy_diff[1] ** 2) ** 0.5
+                            if euclidean_distance_change > XY_THRESHOLD and STAGE_HANDLER.curr_stage == 2:
+                                STAGE_HANDLER.annotate_shaking()
+                        inhaler_hand_xy = xy
+                    
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format

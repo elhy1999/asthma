@@ -1,4 +1,4 @@
-from .messages import get_message
+from .messages import get_message, get_shaking_message
 from .plots import colors
 import time
 
@@ -39,7 +39,10 @@ class StageHandler:
         annotator.box_label([0,0,0,0], message, color=colors(0, True))
 
     def handle_stage2(self, annotator, classes_found):
-        if ((self.MOUTH_SEALED_ON_INHALER_CLASS_NAME not in classes_found)):
+        if self.to_annotate_shaking:
+            message = get_shaking_message()
+            self.to_annotate_shaking = False
+        elif ((self.MOUTH_SEALED_ON_INHALER_CLASS_NAME not in classes_found)):
             message = get_message(2)
         else:
             message = get_message(3)
@@ -85,3 +88,6 @@ class StageHandler:
         self.curr_stage += 1
         while self.curr_stage in self.stages_to_skip and self.curr_stage < 5:
             self.curr_stage += 1
+
+    def annotate_shaking(self):
+        self.to_annotate_shaking = True

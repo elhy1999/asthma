@@ -18,6 +18,9 @@ def get_success_message():
     SUCCESS_MESSAGE = "Procedure completed!"
     return SUCCESS_MESSAGE
 
+def get_shaking_message():
+    return "Shaking detected"
+
 def get_message(stage:int, *args):
     if stage == 1:
         return get_stage_one_message()
