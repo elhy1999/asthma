@@ -4,4 +4,7 @@ python train_dual.py --workers 16 --device 0 --batch 8 --data data/inhaler.yaml 
 
 Run this to run inference with the model:
 python detect_dual.py --source 0 --img 640 --device 0 --weights ./model_weights/best.pt --name best
+python detect_dual.py --source 0 --img 640 --device 0 --weights ./runs/train/best2/weights/last.pt --name best
 
+Run this to run the annotator tool:
+python ./tools/label_annotation/labelImg/labelImg.py
