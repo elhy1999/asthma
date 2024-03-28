@@ -1,8 +1,7 @@
-train: data/train/images
+train: data/augmented_dataset/images
 val: data/val/images
 test: data/test/images
 
-# names: ['remove_cap', 'mouth_sealed_on_inhaler', 'mouth_closed', 'mouth_opened']
 
 names: 
   0: inhaler_hand
