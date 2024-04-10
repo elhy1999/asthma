@@ -1,4 +1,4 @@
-train: data/augmented_dataset/images
+train: data/train/images
 val: data/val/images
 test: data/test/images
 
