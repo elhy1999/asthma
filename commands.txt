@@ -1,10 +1,13 @@
 Run this to train the model on GPU:
 
-python train_dual.py --workers 16 --device 0 --batch 8 --data data/inhaler.yaml --img 640 --cfg models/detect/yolov9-c.yaml --weights '' --name attempt --hyp hyp.scratch-high.yaml --min-items 0 --epochs 10 --close-mosaic 15
+python train_dual.py --workers 16 --device 0 --batch 8 --data data/inhaler.yaml --img 640 --cfg models/detect/yolov9-c.yaml --weights '' --name 240409 --hyp hyp.scratch-high.yaml --min-items 0 --epochs 100 --patience 10
+python train_dual.py --workers 16 --device 0 --batch 8 --data data/inhaler.yaml --img 640 --cfg models/detect/yolov9-c.yaml --weights runs/train/2404093/weights/best.pt --name 240409 --hyp hyp.scratch-high.yaml --epochs 100 --patience 10
 
 Run this to run inference with the model:
+python detect_dual.py --source ./data/archive/used_videos/zzz_more_videos/full_flow.mp4 --img 640 --device 0 --weights ./model_weights/best_tele.pt --name best_tele
+python detect_dual.py --source ./data/archive/used_videos/zzz_more_videos/full_flow.mp4 --img 640 --device 0 --weights ./model_weights/best_drive.pt --name best_drive
 python detect_dual.py --source 0 --img 640 --device 0 --weights ./model_weights/best.pt --name best
-python detect_dual.py --source 0 --img 640 --device 0 --weights ./runs/train/best2/weights/last.pt --name best
+python detect_dual.py --source 0 --img 640 --device 0 --weights C:\Users\ernes\Git\asthma\runs\train\2404093\weights --name 2404093
 
 Run this to run the annotator tool:
 python ./tools/label_annotation/labelImg/labelImg.py
